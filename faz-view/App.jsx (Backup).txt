@@ -1,0 +1,696 @@
+import React, { useState } from 'react';
+
+// STYLED MASCOT LOGO
+const FreddyDinerIcon = () => (
+  <svg className="w-10 h-10 text-[#eb5437] transition-transform duration-300 hover:rotate-6 shrink-0 block" viewBox="0 0 100 100" fill="currentColor">
+    <ellipse cx="50" cy="46" rx="34" ry="7" />
+    <path d="M 30 44 L 34 16 L 66 16 L 70 44 Z" />
+    <path d="M 32 36 L 33 44 L 67 44 L 68 36 Z" fill="#faf4ea" />
+    <circle cx="22" cy="48" r="9" />
+    <circle cx="78" cy="48" r="9" />
+    <polygon points="36,64 64,64 50,74" fill="#eb5437" />
+    <polygon points="36,84 64,84 50,74" fill="#eb5437" />
+    <circle cx="50" cy="74" r="3.5" fill="#f59e0b" />
+  </svg>
+);
+
+const TABLES = [
+  { id: 1, name: "Table 1 (Center Stage Banquet)", type: "Banquet Bench", shape: "banquet", capacity: 8, x: "50%", y: "28%", isSensorySafe: false, zone: "Stage View", desc: "Front-row center party bench directly facing Freddy. Maximum immersion and volume." },
+  { id: 2, name: "Table 2 (Stage Left Banquet)", type: "Banquet Bench", shape: "banquet", capacity: 8, x: "24%", y: "28%", isSensorySafe: false, zone: "Stage View", desc: "Front-row party bench directly beneath Bonnie's guitar audio stack." },
+  { id: 3, name: "Table 3 (Stage Right Banquet)", type: "Banquet Bench", shape: "banquet", capacity: 8, x: "76%", y: "28%", isSensorySafe: false, zone: "Stage View", desc: "Front-row party bench facing Chica and Mr. Cupcake." },
+  { id: 4, name: "Table 4 (Family Circle West)", type: "Family Circle", shape: "circle", capacity: 5, x: "35%", y: "52%", isSensorySafe: false, zone: "Stage View", desc: "Mid-tier circular table with direct sightline to the performance." },
+  { id: 5, name: "Table 5 (Family Circle East)", type: "Family Circle", shape: "circle", capacity: 5, x: "65%", y: "52%", isSensorySafe: false, zone: "Stage View", desc: "Mid-tier circular table with unobstructed sound balance." },
+  { id: 6, name: "Table 6 (West Wall Quiet Booth)", type: "Acoustic Booth", shape: "booth", capacity: 4, x: "12%", y: "78%", isSensorySafe: true, zone: "Low-Sensory", desc: "Acoustically insulated booth against west wall. Shielded from direct stage strobes." },
+  { id: 7, name: "Table 7 (Rear Quiet Booth)", type: "Acoustic Booth", shape: "booth", capacity: 4, x: "50%", y: "80%", isSensorySafe: true, zone: "Low-Sensory", desc: "Rear booth with dimmed warm lighting, tailored for sensory-sensitive families." },
+  { id: 8, name: "Table 8 (East Wall Quiet Booth)", type: "Acoustic Booth", shape: "booth", capacity: 4, x: "88%", y: "78%", isSensorySafe: true, zone: "Low-Sensory", desc: "Quiet dining booth shielded from primary loudspeaker reverberation." },
+];
+
+const SHOWS = {
+  "12:00 PM": { title: "Freddy's Grand Welcome Jam", desc: "Full animatronic trio live overture with confetti burst." },
+  "1:00 PM": { title: "Bonnie's Rockin' Solo", desc: "Electric guitar solo (High acoustic energy)." },
+  "2:00 PM": { title: "Chica's Pizza Party Singalong", desc: "Interactive dining singalong for young guests." },
+  "3:00 PM": { title: "Foxy's Pirate Cove Storyline", desc: "Low-volume acoustic performance (Sensory-friendly)." },
+};
+
+// REUSABLE GLOBAL FOOTER WITH GUEST FEEDBACK SYSTEM
+const GlobalFooter = () => {
+  const [feedbackRating, setFeedbackRating] = useState(5);
+  const [feedbackText, setFeedbackText] = useState("");
+  const [feedbackSubmitted, setFeedbackSubmitted] = useState(false);
+
+  const handleFeedbackSubmit = (e) => {
+    e.preventDefault();
+    if (!feedbackText.trim()) return;
+    setFeedbackSubmitted(true);
+  };
+
+  return (
+    <footer className="bg-[#ede1d1] border-t-2 border-[#eb5437]/20 pt-12 pb-8 px-6 text-stone-800">
+      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8 mb-10 text-xs">
+        
+        {/* Col 1: Brand & Identity */}
+        <div className="space-y-3">
+          <div className="flex items-center gap-2.5">
+            <FreddyDinerIcon />
+            <span className="text-xl font-black tracking-tighter text-[#eb5437] font-serif leading-none">FAZBEAR'S</span>
+          </div>
+          <p className="text-[11px] font-medium text-stone-600 leading-relaxed">
+            Family entertainment, arcade thrills, and live animatronic performances. Redefining dining safety and customer experience since 1983.
+          </p>
+          <p className="text-[10px] font-mono font-bold text-stone-500">
+            "Keep the System Running: Code Through the Fear."
+          </p>
+        </div>
+
+        {/* Col 2: Operating Hours & Shows */}
+        <div className="space-y-2">
+          <h4 className="font-black uppercase tracking-wider text-stone-900 border-b border-stone-300 pb-1">
+            Operating Hours
+          </h4>
+          <div className="text-[11px] space-y-1 text-stone-700">
+            <p className="flex justify-between"><span>Mon - Thu:</span> <strong className="font-mono">10 AM - 9 PM</strong></p>
+            <p className="flex justify-between"><span>Fri - Sat:</span> <strong className="font-mono">10 AM - 11 PM</strong></p>
+            <p className="flex justify-between"><span>Sunday:</span> <strong className="font-mono">11 AM - 8 PM</strong></p>
+            <div className="pt-2 text-[10px] font-bold text-[#eb5437]">
+              ★ Live Animatronic Sets: 12 PM, 1 PM, 2 PM, 3 PM
+            </div>
+          </div>
+        </div>
+
+        {/* Col 3: Location & Support */}
+        <div className="space-y-2">
+          <h4 className="font-black uppercase tracking-wider text-stone-900 border-b border-stone-300 pb-1">
+            Location & Contact
+          </h4>
+          <div className="text-[11px] space-y-1.5 text-stone-700">
+            <p><strong>Main Venue:</strong> Norbert Auditorium & Grounds</p>
+            <p>Cor Jesu College, Digos City</p>
+            <p className="pt-1"><strong>Guest Inquiries:</strong> 1-800-FAZ-BEAR</p>
+            <p><strong>Support:</strong> reservations@fazbear2.0.cjc</p>
+          </div>
+        </div>
+
+        {/* Col 4: INTERACTIVE GUEST FEEDBACK FORM (Track 2: Guest Experience) */}
+        <div className="space-y-2 bg-[#faf4ea] p-3.5 rounded-lg border border-[#eb5437]/30 shadow-sm">
+          <h4 className="font-black uppercase tracking-wider text-[#eb5437] text-[11px] flex justify-between items-center">
+            <span>Guest Feedback</span>
+            <span className="text-[9px] font-mono text-stone-500 font-bold">THANK YOU!</span>
+          </h4>
+
+          {feedbackSubmitted ? (
+            <div className="p-3 bg-emerald-100 border border-emerald-400 rounded text-center text-emerald-900 font-bold text-[11px]">
+              ✓ Thank you! Feedback transmitted to Freddy's floor manager.
+            </div>
+          ) : (
+            <form onSubmit={handleFeedbackSubmit} className="space-y-2">
+              <div className="flex items-center justify-between text-[10px] font-bold text-stone-700">
+                <span>Rating:</span>
+                <div className="flex gap-1 text-amber-500 cursor-pointer">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      type="button"
+                      key={star}
+                      onClick={() => setFeedbackRating(star)}
+                      className={`text-sm ${star <= feedbackRating ? "text-[#eb5437]" : "text-stone-300"}`}
+                    >
+                      ★
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <textarea
+                value={feedbackText}
+                onChange={(e) => setFeedbackText(e.target.value)}
+                placeholder="How was your stage view or dining experience?"
+                className="w-full p-1.5 text-[10px] bg-white border border-stone-300 rounded resize-none focus:outline-[#eb5437] text-stone-800"
+                rows="2"
+                required
+              />
+
+              <button
+                type="submit"
+                className="w-full py-1.5 bg-[#eb5437] hover:bg-[#d64327] text-white font-black text-[10px] uppercase tracking-wider rounded shadow transition-all cursor-pointer"
+              >
+                Submit Feedback
+              </button>
+            </form>
+          )}
+        </div>
+
+      </div>
+
+      {/* Bottom Credits Line */}
+      <div className="max-w-7xl mx-auto pt-6 border-t border-stone-300/80 flex flex-col sm:flex-row justify-between items-center text-[10px] text-stone-600 font-mono gap-2">
+        <span>© 2026 Fazbear Entertainment, Inc. • Developed by Marquis & Andrei</span>
+        <span>Cor Jesu College — College of Computing & Information Sciences</span>
+      </div>
+    </footer>
+  );
+};
+
+export default function App() {
+  const [currentView, setCurrentView] = useState('landing');
+  const [selectedTable, setSelectedTable] = useState(TABLES[0]);
+  const [selectedTime, setSelectedTime] = useState("12:00 PM");
+  const [sensoryFilter, setSensoryFilter] = useState(false);
+
+  const [reservations, setReservations] = useState({
+    "12:00 PM": [2, 5],
+    "1:00 PM": [1, 7],
+    "2:00 PM": [3, 4],
+    "3:00 PM": [2, 8],
+  });
+
+  const isCurrentTableBooked = reservations[selectedTime]?.includes(selectedTable?.id);
+
+  // Dynamic sensory filter
+  const availableTables = TABLES.filter((table) => {
+    const isBooked = reservations[selectedTime]?.includes(table.id);
+    if (isBooked) return false;
+    if (sensoryFilter && !table.isSensorySafe) return false;
+    return true;
+  });
+
+  const handleSensoryToggle = (checked) => {
+    setSensoryFilter(checked);
+    if (checked && !selectedTable.isSensorySafe) {
+      const firstSafe = TABLES.find(t => t.isSensorySafe && !reservations[selectedTime]?.includes(t.id));
+      if (firstSafe) setSelectedTable(firstSafe);
+    }
+  };
+
+  const handleBooking = () => {
+    if (!selectedTable || isCurrentTableBooked) return;
+    setReservations((prev) => ({
+      ...prev,
+      [selectedTime]: [...prev[selectedTime], selectedTable.id],
+    }));
+  };
+
+  const openBookingView = () => {
+    setCurrentView('booking');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const openLandingView = () => {
+    setCurrentView('landing');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  return (
+    <div className="min-h-screen bg-[#faf4ea] text-stone-900 font-sans select-none flex flex-col overflow-x-hidden">
+      
+      {/* 1. STICKY TOP NAVIGATION BAR */}
+      <header className="sticky top-0 z-50 bg-[#faf4ea]/95 backdrop-blur-md border-b-2 border-[#eb5437]/20 shadow-sm">
+        <div 
+          className="h-2.5 w-full border-b border-[#eb5437]/30" 
+          style={{ backgroundImage: "repeating-conic-gradient(#eb5437 0% 25%, #faf4ea 0% 50%) 50% / 14px 14px" }}
+        />
+        <nav className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
+          
+          {/* PERFECT VERTICAL ALIGNMENT FOR LOGO & TEXT */}
+          <div className="flex items-center gap-2.5 cursor-pointer" onClick={openLandingView}>
+            <FreddyDinerIcon />
+            <div className="flex flex-col justify-center">
+              <span className="text-2xl md:text-3xl font-black tracking-tighter text-[#eb5437] font-serif leading-none block">
+                FAZBEAR'S
+              </span>
+              <span className="text-[10px] font-mono font-bold tracking-widest text-stone-700 uppercase mt-0.5 block leading-none">
+                By Marquis & Andrei
+              </span>
+            </div>
+          </div>
+
+          <div className="hidden md:flex items-center gap-8 text-xs font-bold tracking-wider text-stone-800">
+            <button onClick={openLandingView} className={`hover:text-[#eb5437] transition-colors cursor-pointer ${currentView === 'landing' ? 'text-[#eb5437] font-black' : ''}`}>Home</button>
+            <a href="#menu-deals" onClick={() => currentView !== 'landing' && setCurrentView('landing')} className="hover:text-[#eb5437] transition-colors">Menu Deals</a>
+            <span className="text-stone-400">|</span>
+            <span className="text-[11px] font-mono font-bold text-stone-700">PIZZERIA & SHOWROOM WITH AN ARCADE!</span>
+          </div>
+
+          <button 
+            onClick={currentView === 'landing' ? openBookingView : openLandingView}
+            className="px-5 py-2.5 bg-[#eb5437] hover:bg-[#d64327] active:scale-95 text-[#faf4ea] font-black text-xs uppercase tracking-wider rounded shadow transition-all duration-200 cursor-pointer"
+          >
+            {currentView === 'landing' ? "Reserve Table" : "Back to Diner Menu"}
+          </button>
+        </nav>
+      </header>
+
+      {/* 2. CONDITIONAL VIEW: LANDING OR BOOKING */}
+      {currentView === 'landing' ? (
+        /* ==================== VIEW 1: LANDING PAGE ==================== */
+        <div className="flex-1 flex flex-col">
+          
+          {/* HERO SECTION */}
+          <section className="max-w-7xl w-full mx-auto px-6 py-14">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+              
+              <div className="lg:col-span-7 space-y-6">
+                <div>
+                  <h1 className="text-6xl md:text-7xl font-black tracking-tight text-[#eb5437] uppercase leading-[0.9] font-serif">
+                    SINGING <br />
+                    <span className="bg-[#eb5437] text-[#faf4ea] px-3 py-1 inline-block mt-2 shadow-sm rounded-sm">
+                      EVERY NIGHT
+                    </span>
+                  </h1>
+                  <p className="text-sm font-semibold text-stone-700 mt-5 max-w-lg leading-relaxed">
+                    Authentic American pan pizza, cold sodas, and synchronized animatronic musical revues featuring Freddy, Bonnie, and Chica. Guaranteed safe family dining since 1983.
+                  </p>
+                  
+                  <div className="mt-6 flex flex-wrap gap-4">
+                    <button 
+                      onClick={openBookingView}
+                      className="px-8 py-3.5 bg-[#eb5437] hover:bg-[#d64327] active:scale-95 text-[#faf4ea] font-black text-xs uppercase tracking-widest rounded shadow-lg transition-all duration-200 cursor-pointer"
+                    >
+                      Select Show Seating
+                    </button>
+                    <a 
+                      href="#menu-deals"
+                      className="px-8 py-3.5 bg-white border-2 border-[#eb5437] text-[#eb5437] hover:bg-[#faf4ea] font-black text-xs uppercase tracking-widest rounded shadow transition-all duration-200"
+                    >
+                      View Value Deals
+                    </a>
+                  </div>
+                </div>
+
+                {/* BEST SELLER BOX */}
+                <div className="border-2 border-[#eb5437] rounded-lg p-4 relative pt-5 mt-4 bg-white/80 shadow-sm">
+                  <span className="absolute -top-3 left-4 bg-[#faf4ea] px-2 text-xs font-black uppercase tracking-wider text-[#eb5437]">
+                    ★ Pizzeria Best Sellers
+                  </span>
+                  <div className="grid grid-cols-2 gap-4 items-center">
+                    <div className="space-y-3">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-black text-stone-900 uppercase">Freddy's Meat Feast</span>
+                          <span className="text-xs font-black font-mono text-[#eb5437]">$11.99</span>
+                        </div>
+                        <p className="text-[11px] font-medium text-stone-700 leading-tight">Pepperoni, Italian sausage, smoked bacon, savory marinara.</p>
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-black text-stone-900 uppercase">Bonnie's Combo Basket</span>
+                          <span className="text-xs font-black font-mono text-[#eb5437]">$14.99</span>
+                        </div>
+                        <p className="text-[11px] font-medium text-stone-700 leading-tight">40 Game Tokens, Large 1-Topping Pizza, and 4 sodas.</p>
+                      </div>
+                    </div>
+
+                    <div className="border-l-2 border-dashed border-[#eb5437]/40 pl-4 flex flex-col items-center justify-center text-center">
+                      <span className="text-4xl animate-bounce">🎟️</span>
+                      <span className="text-[11px] font-black text-[#eb5437] uppercase tracking-wider mt-1">Free Game Tokens</span>
+                      <span className="text-[10px] font-bold text-stone-700 font-mono">Included With Every Deal</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* USER'S IMAGE CONTAINER */}
+              <div className="lg:col-span-5 flex justify-center">
+                <div className="relative w-full max-w-md aspect-square bg-[#eb5437] rounded-2xl p-4 shadow-2xl flex items-center justify-center overflow-hidden">
+                  <div 
+                    className="absolute inset-0 opacity-20"
+                    style={{ background: "repeating-conic-gradient(from 0deg, #faf4ea 0deg 15deg, transparent 15deg 30deg)" }}
+                  />
+
+                  <div className="relative z-10 w-full h-full bg-[#faf4ea] rounded-xl border-4 border-[#faf4ea] overflow-hidden shadow-inner flex flex-col">
+                    <img 
+                      src="/resto.webp" 
+                      alt="Freddy Fazbear Pizzeria Stage" 
+                      onError={(e) => {
+                        if (!e.target.dataset.triedJpg) {
+                          e.target.dataset.triedJpg = "true";
+                          e.target.src = "/hero.jpg";
+                        } else {
+                          e.target.style.display = 'none';
+                          e.target.nextSibling.style.display = 'flex';
+                        }
+                      }}
+                      className="w-full h-full object-cover transition-transform duration-700 hover:scale-105"
+                    />
+                    
+                    <div className="hidden w-full h-full flex-col items-center justify-center text-center p-6 bg-[#faf4ea]">
+                      <span className="text-5xl">🐻</span>
+                      <h3 className="text-base font-black text-[#eb5437] mt-3 font-serif uppercase">YOUR IMAGE HERE</h3>
+                      <p className="text-[11px] font-bold text-stone-700 mt-1 max-w-[200px]">
+                        Place your image inside <code className="bg-stone-200 px-1 py-0.5 rounded text-stone-900">public/resto.webp</code>
+                      </p>
+                    </div>
+
+                    <div className="absolute top-3 left-3 bg-[#faf4ea]/95 backdrop-blur border border-stone-300 px-3 py-1 rounded text-[10px] font-mono font-black text-[#eb5437] uppercase shadow-sm flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-red-600 animate-ping"></span>
+                      OPEN 24/7!
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </section>
+
+          {/* HARMONIZED RETRO MENU SECTION */}
+          <section id="menu-deals" className="border-t-2 border-[#eb5437]/20 bg-[#f5efe4] py-16 px-6">
+            <div className="max-w-6xl mx-auto space-y-8">
+              
+              <div className="text-center space-y-1">
+                <span className="text-xs font-mono font-bold tracking-widest text-[#eb5437] uppercase">1983 DINER SPECIALS</span>
+                <h2 className="text-4xl font-black text-stone-900 font-serif uppercase tracking-tight">
+                  FAZBEAR VALUE DEALS & MENU
+                </h2>
+                <p className="text-xs font-semibold text-stone-700 max-w-md mx-auto">
+                  Every meal comes with complimentary animatronic showtime access and tokens.
+                </p>
+              </div>
+
+              {/* 4 Value Deals */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {[
+                  { id: 1, tokens: "20 Game Tokens", pizza: "1 Med 1-Topping Pizza", drinks: "2 Soft Drinks", price: "$3.99" },
+                  { id: 2, tokens: "40 Game Tokens", pizza: "2 Med 1-Topping Pizzas", drinks: "4 Soft Drinks", price: "$5.99" },
+                  { id: 3, tokens: "80 Game Tokens", pizza: "1 Large 1-Topping Pizza", drinks: "4 Soft Drinks", price: "$8.99" },
+                  { id: 4, tokens: "120 Game Tokens", pizza: "2 Large 1-Topping Pizzas", drinks: "6 Soft Drinks", price: "$10.99" },
+                ].map((deal) => (
+                  <div 
+                    key={deal.id} 
+                    className="bg-white border-2 border-[#eb5437] p-4 rounded-lg shadow-sm hover:-translate-y-1 transition-transform duration-200 flex flex-col justify-between"
+                  >
+                    <div className="flex items-start justify-between border-b border-[#eb5437]/20 pb-2 mb-2">
+                      <span className="text-xs font-black uppercase text-[#eb5437] tracking-wider font-serif">★ DEAL #{deal.id}</span>
+                      <span className="text-lg font-black font-mono text-stone-900">{deal.price}</span>
+                    </div>
+                    <div className="text-[11px] font-bold text-stone-800 space-y-1 uppercase leading-tight">
+                      <p className="text-[#eb5437] font-black">• {deal.tokens}</p>
+                      <p>• {deal.pizza}</p>
+                      <p>• {deal.drinks}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Bonnie's Family Special Banner */}
+              <div className="bg-[#eb5437] text-[#faf4ea] border-2 border-[#eb5437] p-5 rounded-xl flex flex-col md:flex-row items-center justify-between shadow-lg gap-4">
+                <div>
+                  <span className="bg-[#faf4ea] text-[#eb5437] px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider inline-block mb-1">
+                    MOST POPULAR
+                  </span>
+                  <h3 className="text-2xl font-black uppercase tracking-wider font-serif">BONNIE'S FAMILY SPECIAL</h3>
+                  <p className="text-xs font-bold text-amber-100 uppercase mt-1">
+                    120 Game Tokens • 4 Large 1-Topping Pizzas • 2 Large Fries • 10 Soft Drinks
+                  </p>
+                </div>
+                <div className="text-right shrink-0">
+                  <span className="text-4xl font-black font-mono text-white">$14.99</span>
+                </div>
+              </div>
+
+              {/* Two-Column Category Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="bg-white border-2 border-[#eb5437] rounded-xl p-6 shadow-sm space-y-4">
+                  <div className="border-b-2 border-[#eb5437]/20 pb-2 flex justify-between items-center">
+                    <h3 className="text-lg font-black uppercase tracking-wider text-[#eb5437] font-serif">★ FREDDY'S PIZZAS</h3>
+                    <span className="text-[11px] font-mono font-bold text-stone-700">Pan Baked Daily</span>
+                  </div>
+                  <div className="space-y-3 text-xs">
+                    <div>
+                      <div className="flex justify-between font-black uppercase text-stone-900">
+                        <span>All Meat Combo</span>
+                        <span className="text-[#eb5437] font-mono text-sm">$11.99</span>
+                      </div>
+                      <p className="text-[11px] font-medium text-stone-700">Pepperoni, Italian sausage, smoked bacon, savory marinara.</p>
+                    </div>
+                    <div>
+                      <div className="flex justify-between font-black uppercase text-stone-900">
+                        <span>Veggie Lovers</span>
+                        <span className="text-[#eb5437] font-mono text-sm">$9.99</span>
+                      </div>
+                      <p className="text-[11px] font-medium text-stone-700">Tomatoes, black olives, green peppers, onions, fresh mushrooms.</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-white border-2 border-[#eb5437] rounded-xl p-6 shadow-sm space-y-4">
+                  <div className="border-b-2 border-[#eb5437]/20 pb-2 flex justify-between items-center">
+                    <h3 className="text-lg font-black uppercase tracking-wider text-[#eb5437] font-serif">★ CHICA'S CRISPY WINGS</h3>
+                    <span className="text-[11px] font-mono font-bold text-stone-700">BBQ & Buffalo</span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3 text-xs">
+                    <div className="p-2.5 bg-[#faf4ea] rounded border border-stone-300">
+                      <span className="block text-[10px] uppercase font-bold text-stone-700">Small (3 Pcs)</span>
+                      <strong className="text-sm font-mono text-[#eb5437]">$2.99</strong>
+                    </div>
+                    <div className="p-2.5 bg-[#faf4ea] rounded border border-stone-300">
+                      <span className="block text-[10px] uppercase font-bold text-stone-700">Family (8 Pcs)</span>
+                      <strong className="text-sm font-mono text-[#eb5437]">$8.99</strong>
+                    </div>
+                    <div className="p-2.5 bg-[#faf4ea] rounded border border-stone-300">
+                      <span className="block text-[10px] uppercase font-bold text-stone-700">Party (12 Pcs)</span>
+                      <strong className="text-sm font-mono text-[#eb5437]">$4.99</strong>
+                    </div>
+                    <div className="p-2.5 bg-[#faf4ea] rounded border border-stone-300">
+                      <span className="block text-[10px] uppercase font-bold text-stone-700">XL Party (15 Pcs)</span>
+                      <strong className="text-sm font-mono text-[#eb5437]">$6.99</strong>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </section>
+
+          {/* BOTTOM FINAL CTA BANNER */}
+          <section className="bg-[#eb5437] text-[#faf4ea] py-14 px-6 text-center">
+            <div className="max-w-2xl mx-auto space-y-4">
+              <h2 className="text-3xl md:text-4xl font-black font-serif uppercase tracking-tight">
+                READY TO JOIN FREDDY & THE BAND?
+              </h2>
+              <p className="text-xs md:text-sm font-bold text-amber-100 max-w-lg mx-auto leading-relaxed">
+                Book your arrival slot, inspect real-time stage line-of-sight, and claim your table on the floor plan.
+              </p>
+              <div className="pt-2">
+                <button
+                  onClick={openBookingView}
+                  className="px-10 py-4 bg-[#faf4ea] hover:bg-white active:scale-95 text-[#eb5437] font-black text-sm uppercase tracking-widest rounded-lg shadow-2xl transition-all cursor-pointer"
+                >
+                  RESERVE YOUR TABLE NOW
+                </button>
+              </div>
+            </div>
+          </section>
+
+        </div>
+      ) : (
+        /* ==================== VIEW 2: FAZ-VIEW SPATIAL BOOKING ==================== */
+        <div className="flex-1 max-w-7xl w-full mx-auto p-6 flex flex-col">
+          
+          <div className="pb-4 border-b border-[#eb5437]/20 mb-6">
+            <span className="text-[11px] font-mono font-bold tracking-widest text-[#eb5437] uppercase">EXPERIENCE THE SHOW!</span>
+            <h2 className="text-2xl font-black text-stone-900 font-serif uppercase">SPATIAL SHOW RESERVATION</h2>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start mb-12">
+            
+            {/* LEFT 4 COLS: CONTROLS & AVAILABLE TABLE LIST */}
+            <div className="lg:col-span-4 bg-white border-2 border-[#eb5437]/30 rounded-xl p-5 shadow-sm flex flex-col justify-between">
+              <div>
+                <div className="border-b border-stone-200 pb-2 mb-3">
+                  <span className="text-[10px] font-black uppercase tracking-wider text-[#eb5437] block">Step 1</span>
+                  <h3 className="text-sm font-black uppercase text-stone-900">Select Show Slot</h3>
+                </div>
+
+                {/* Time Slots */}
+                <div className="grid grid-cols-2 gap-2 mb-3">
+                  {Object.keys(SHOWS).map((time) => (
+                    <button
+                      key={time}
+                      onClick={() => setSelectedTime(time)}
+                      className={`py-1.5 px-3 text-xs font-black rounded border-2 transition-all cursor-pointer ${
+                        selectedTime === time
+                          ? "bg-[#eb5437] text-white border-[#eb5437] shadow-sm scale-102"
+                          : "bg-[#faf4ea] border-stone-300 hover:border-stone-400 text-stone-800"
+                      }`}
+                    >
+                      {time}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Routine Card */}
+                <div className="p-2.5 bg-[#faf4ea] border border-[#eb5437]/30 rounded-lg mb-3">
+                  <span className="text-[9px] font-black uppercase text-[#eb5437] block">Synchronized Routine</span>
+                  <p className="text-xs font-black text-stone-900">{SHOWS[selectedTime].title}</p>
+                  <p className="text-[11px] font-medium text-stone-700 mt-0.5">{SHOWS[selectedTime].desc}</p>
+                </div>
+
+                {/* Sensory Mode Toggle */}
+                <div className="p-2.5 bg-stone-50 border border-stone-300 rounded-lg mb-3 flex items-center justify-between">
+                  <div>
+                    <span className="text-xs font-bold text-stone-900 block">Sensory-Friendly Mode</span>
+                    <span className="text-[10px] font-medium text-stone-700">Dim stage noise & isolate booths</span>
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={sensoryFilter}
+                    onChange={(e) => handleSensoryToggle(e.target.checked)}
+                    className="w-4 h-4 accent-[#eb5437] cursor-pointer"
+                  />
+                </div>
+
+                {/* AVAILABLE TABLES LIST */}
+                <div className="mb-3">
+                  <div className="flex justify-between items-center mb-1">
+                    <span className="text-[10px] font-black uppercase tracking-wider text-stone-700 block">
+                      Available Tables ({availableTables.length})
+                    </span>
+                    {sensoryFilter && (
+                      <span className="text-[9px] font-bold text-teal-700 bg-teal-50 px-1.5 py-0.2 rounded border border-teal-200">
+                        Sensory-Filtered
+                      </span>
+                    )}
+                  </div>
+                  <div className="max-h-36 overflow-y-auto space-y-1.5 pr-1 border border-stone-300 rounded-lg p-2 bg-[#faf4ea]/40">
+                    {availableTables.length === 0 ? (
+                      <p className="text-[11px] font-bold text-stone-700 text-center py-2">No sensory-safe tables available.</p>
+                    ) : (
+                      availableTables.map((table) => {
+                        const isSelected = selectedTable?.id === table.id;
+                        return (
+                          <button
+                            key={table.id}
+                            onClick={() => setSelectedTable(table)}
+                            className={`w-full text-left px-2.5 py-1.5 rounded text-[11px] font-bold flex items-center justify-between transition-all cursor-pointer ${
+                              isSelected 
+                                ? "bg-[#eb5437] text-white shadow-sm scale-[1.01]" 
+                                : "bg-white hover:bg-stone-50 text-stone-900 border border-stone-300"
+                            }`}
+                          >
+                            <span className="truncate">T-{table.id}: {table.type}</span>
+                            <span className={`text-[10px] font-mono px-1 rounded ml-1 shrink-0 ${
+                              isSelected ? "text-amber-200" : "text-stone-700 font-bold"
+                            }`}>
+                              {table.capacity} Seats • {table.zone}
+                            </span>
+                          </button>
+                        );
+                      })
+                    )}
+                  </div>
+                </div>
+
+                {/* Selected Table Inspection Card */}
+                {selectedTable && (
+                  <div className="p-3 bg-[#faf4ea] border border-stone-300 rounded-lg">
+                    <div className="flex justify-between items-center mb-1">
+                      <span className="text-[10px] font-bold text-[#eb5437] uppercase">{selectedTable.type}</span>
+                      <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded ${
+                        isCurrentTableBooked ? "bg-stone-300 text-stone-800" : "bg-emerald-100 text-emerald-900"
+                      }`}>
+                        {isCurrentTableBooked ? "Occupied" : "Available"}
+                      </span>
+                    </div>
+                    <h4 className="text-xs font-black text-stone-900">{selectedTable.name}</h4>
+                    <p className="text-[11px] font-medium text-stone-700 mt-0.5">{selectedTable.desc}</p>
+                    <p className="text-[11px] font-mono font-bold text-stone-800 mt-1">Capacity: {selectedTable.capacity} Seats • {selectedTable.zone}</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Confirm CTA */}
+              <div className="pt-3 border-t border-stone-200 mt-3">
+                {isCurrentTableBooked ? (
+                  <div className="p-2.5 bg-stone-300 text-stone-800 text-center text-xs font-black rounded-lg">
+                    ✕ Occupied for {selectedTime}
+                  </div>
+                ) : (
+                  <button
+                    onClick={handleBooking}
+                    className="w-full py-2.5 bg-[#eb5437] hover:bg-[#d64327] active:scale-98 text-white font-black text-xs uppercase tracking-widest rounded-lg shadow transition-all cursor-pointer"
+                  >
+                    Confirm Table {selectedTable?.id}
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* RIGHT 8 COLS: BLUEPRINT CANVAS */}
+            <div className="lg:col-span-8 bg-white border-2 border-[#eb5437]/30 rounded-xl p-5 shadow-sm flex flex-col h-[560px]">
+              <div className="flex justify-between items-center text-xs font-mono font-bold text-stone-700 mb-2">
+                <span className="text-[#eb5437] font-black">AUDIENCE DINING FLOOR</span>
+                <span>TIME SLOT: {selectedTime}</span>
+              </div>
+
+              <div className="relative flex-1 border-2 border-stone-300 bg-[#faf4ea] rounded-lg overflow-hidden flex flex-col">
+                {/* STAGE HEADER */}
+                <div className="w-full h-16 bg-[#eb5437] text-white flex flex-col items-center justify-center shrink-0 shadow-sm">
+                  <span className="text-xs font-black tracking-widest uppercase">★ MAIN ANIMATRONIC STAGE ★</span>
+                  <span className="text-[10px] font-mono text-amber-200 mt-0.5">FREDDY • BONNIE • CHICA • FOXY </span>
+                </div>
+
+                {/* FLOOR CANVAS */}
+                <div className="relative flex-1 w-full">
+                  {TABLES.map((table) => {
+                    const isSelected = selectedTable?.id === table.id;
+                    const isBooked = reservations[selectedTime]?.includes(table.id);
+                    const isDimmed = sensoryFilter && !table.isSensorySafe;
+
+                    const shapeClasses = 
+                      table.shape === "banquet" 
+                        ? "w-28 h-12 rounded-md" 
+                        : table.shape === "circle" 
+                        ? "w-16 h-16 rounded-full" 
+                        : "w-20 h-14 rounded-lg border-dashed";
+
+                    return (
+                      <button
+                        key={table.id}
+                        disabled={isBooked}
+                        onClick={() => setSelectedTable(table)}
+                        style={{ top: table.y, left: table.x }}
+                        className={`absolute transform -translate-x-1/2 -translate-y-1/2 p-2 border-2 transition-all cursor-pointer z-20 flex flex-col items-center justify-center ${shapeClasses} ${
+                          isBooked
+                            ? "bg-stone-300 border-stone-400 text-stone-700 opacity-60 cursor-not-allowed font-bold"
+                            : isDimmed
+                            ? "bg-stone-200 border-stone-300 text-stone-400 opacity-20 scale-90"
+                            : table.zone === "Stage View"
+                            ? "bg-[#eb5437] border-[#eb5437] text-white shadow-sm"
+                            : "bg-teal-700 border-teal-700 text-white shadow-sm"
+                        } ${
+                          isSelected && !isBooked 
+                            ? "ring-4 ring-amber-400 scale-110 shadow-xl z-30" 
+                            : "hover:scale-105"
+                        }`}
+                      >
+                        <span className="text-[11px] font-black font-mono leading-none">T-{table.id}</span>
+                        <span className="text-[8px] font-black uppercase mt-0.5 tracking-tight">
+                          {isBooked ? "TAKEN" : `${table.capacity} SEATS`}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* HIGH-CONTRAST MAP LEGEND */}
+                <div className="absolute bottom-2 left-3 bg-white/95 border border-stone-400 px-3 py-1 rounded flex gap-4 text-[10px] font-mono font-bold text-stone-800 shadow-sm">
+                  <span className="flex items-center gap-1"><span className="w-2.5 h-2 bg-[#eb5437] rounded-sm"></span> Stage View</span>
+                  <span className="flex items-center gap-1"><span className="w-2.5 h-2 bg-teal-700 rounded-sm"></span> Sensory Safe</span>
+                  <span className="flex items-center gap-1"><span className="w-2.5 h-2 bg-stone-400 rounded-sm"></span> Occupied</span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      )}
+
+      {/* 3. UNIVERSAL FOOTER (Rendered on both views) */}
+      <GlobalFooter />
+
+      {/* 4. BOTTOM CHECKERBOARD */}
+      <div 
+        className="h-2.5 w-full shrink-0 border-t border-[#eb5437]/30" 
+        style={{ backgroundImage: "repeating-conic-gradient(#eb5437 0% 25%, #faf4ea 0% 50%) 50% / 14px 14px" }}
+      />
+    </div>
+  );
+}
